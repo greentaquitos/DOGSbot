@@ -1,23 +1,21 @@
 
 from config import TOKEN
-import bot
+from bot import Bot
 
 global b
 
 
 if __name__ == "__main__":
-    b = bot.Bot(False)
+    b = Bot(False)
 else:
 	exit()
 
 @b.client.event
 async def on_ready():
-	b.on_ready()
-	pass
+	await b.on_ready()
 
 @b.client.event
 async def on_message(message):
-	b.on_message(message)
-	pass
+	await b.on_message(message)
 
 b.start_bot(TOKEN)

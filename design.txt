@@ -30,7 +30,7 @@ dq del char [indicator]
 
 	>dq del char 4
 
-	Deleting Bob, are you sure?
+	Deleting Bob, are you sure? (Y/n)
 
 	>Y
 
