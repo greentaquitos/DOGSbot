@@ -1,0 +1,274 @@
+dq new game Character Name, Other Name, Other Other Character Name
+	
+	-archives old characters
+	-adds new characters
+
+	New game started with:
+		1 - Character Name
+		2 - Other Char Name
+		3 - Other Other Char Name
+
+
+dq add char [name]
+
+	-adds character to the game
+
+	>dq add char Bob
+
+	Added Bob to the game!
+
+	1 - Character Name
+	2 - Other Char Name
+	3 - Other Other Char Name
+	4 - Bob
+
+
+dq del char [indicator]
+
+	-archives indicated character
+	-probably a confirm prompt for this?
+
+	>dq del char 4
+
+	Deleting Bob, are you sure?
+
+	>Y
+
+	Deleted Bob!
+
+	1 - Character Name
+	2 - Other Char Name
+	3 - Other Other Char Name
+
+
+dq set char [indicator]
+
+	-indicator is the id integer as displayed above or the first n letters of the character's name
+	-sets the player who used the command as using the character indicated
+
+	>dq set char 2
+
+	@player, you are now playing as Other Char Name
+
+	Dice:
+	6, 5, 1
+
+	Consequences:
+	[empty]
+
+	Moves:
+	cool move   - 3d4
+	~~uncool move - 2d8~~
+
+
+
+
+dq rename char [indicator], New Name
+	
+	-renames the character
+
+	>dq rename Character Name, Alice
+	
+	Character Name renamed to Alice
+
+
+dq + [x]d[y]
+dq +c [consequence]
+dq + [n]
+dq +m [move]
+dq + [indicator]
+
+	-rolls x y-sided dice and adds results to your character's dice pool
+	-or adds a given consequence to your character's consequence pool
+	-or add n to your character's dice pool
+	-or adds a given move to your character's sheet
+	-or rolls the indicated move and adds it to the character’s dice pool
+
+	
+	>dq + 2d8
+
+	Rolled: 1, 6
+
+	Your pool: 6, 5, 2, 1
+
+	
+	>dq +c 3d6 a big yike
+
+	Added!
+
+	A - 3d6 - a big yike
+
+	
+	>dq +c 2d4 a small yike
+
+	Added!
+
+	A - 3d6 - a big yike
+	B - 2d4 - a small yike
+
+	
+	>dq + 6
+
+	Added!
+
+	Your pool: 6, 6, 5, 2, 1
+
+	
+	>dq +m 6d6 Body
+
+	Added!
+
+	A - 2d6 - Mind
+	B - 6d6 - Body
+
+
+	>dq + Bod
+
+	Rolled Body (6d6): 6,6,5,2,2,2
+
+	Your pool: 6, 6, 5, 5, 2, 2, 2, 2, 1
+
+	A - 2d6 - Mind
+	~~B - 6d6 - Body~~
+
+
+
+
+dq - [x,y,...]
+dq -m [indicator]
+dq -c [indicator]
+
+	-removes values from dice pool
+	-or removes indicated move from character sheet
+	-or removes indicated consequence from consequence pool
+
+	>dq - 6 2
+
+	Removed 6 and 2!
+
+	Your pool: 6, 5, 1
+
+	
+	>dq -c A
+
+	Removed `a big yike`!
+
+	A - a small yike
+
+	
+	>dq -c a small
+
+	Removed `a small yike`!
+
+	[empty]
+
+	
+	>dq -m mind
+
+	Removed `Mind`!
+
+	A - 6d6 - Body
+
+
+dq view [dpool/cpool/moves/pools/characters/indicator/dpools]
+
+	-poop out whatever list is indicated or character indicated by [indicator]
+
+	>dq view dpool
+
+	6, 5, 1
+
+	
+	>dq view Alice
+
+	Alice
+
+	Dice:
+	6, 5, 1
+
+	Consequences:
+	[empty]
+
+	Moves:
+	cool move   - 3d4
+	~~uncool move - 2d8~~
+
+
+dq clear [dpools/cpools/pools]
+
+	-resets all of the given type of pool for all characters
+
+	
+	>dq clear pools
+
+	Dice pools and consequence pools cleared!
+
+
+dq roll [x]d[y]
+dq roll cs
+dq roll [indicator]
+
+	-rolls x y-sided dice with no dice pool interaction
+	-or rolls all consequence pool dice and clears that pool
+	-or rolls indicated move's dice and marks it as used
+
+	
+	>dq roll 5d6
+
+	14 = 5 + 3 + 1 + 1 + 4
+
+	
+	>dq roll cs
+	
+	Rolling consequence pool!
+
+	a big yike (3d6): 4,3,1
+	a small yike (2d4): 2,2
+	
+	4+3 = 7
+	One 1 was rolled!
+
+
+dq raise [x] [y]
+
+	-removes 1 or 2 values from dice pool
+
+	
+	>dq raise 1 2
+
+	Raised with 3!
+
+	Your pool: 6, 6, 5
+
+	
+	>dq raise 1 4 4
+
+	You must raise with one or two dice!
+
+
+dq call [x, y, ...]
+
+	-removes values provided from dice pool
+	-results depend on number of values removed
+
+	>dq call 6
+
+	Counter! Use 6 as one of your dice on your next raise.
+
+	Your pool: 5, 2, 1
+
+	
+	>dq call 5 2
+
+	Called with 7!
+	Block or Dodge!
+
+	Your pool: 6, 6, 1
+
+
+	>dq call 6 6 5
+
+	Called with 17!
+	Hit! Take 3 consequence dice.
+
+	Your pool: 2, 1
