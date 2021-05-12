@@ -3,6 +3,8 @@ import discord
 import asyncio
 import sqlite3
 import string
+import random
+import traceback
 
 from character import Character
 from exceptions import FeedbackError
@@ -92,10 +94,10 @@ class Bot():
 		self.log('DOGSbot ready')
 
 	async def on_message(self,m):
-		self.log('got a message: '+m.content)
-
 		if m.author.bot:
 			return
+
+		self.log('got a message: '+m.content)
 
 		try:
 			if m.content.startswith('dq '):
@@ -106,10 +108,12 @@ class Bot():
 				await self.deny(m)
 
 		except FeedbackError as e:
-			m.reply(f"ERROR: {e}")
+			await m.reply(f"ERROR: {e}")
 
 		except Exception as e:
-			m.reply(f"UNCAUGHT ERROR: {e}")
+			self.log(traceback.format_exc())
+			await m.reply(f"UNCAUGHT ERROR: {e}")
+
 
 	# COMMAND PARSING
 
@@ -142,7 +146,25 @@ class Bot():
 	# COMMANDS
 
 	async def roll(self,m):
-		await m.reply(f"rolling {m.content[8:]}...")
+		amt, die = m.content[8:].split('d')
+		
+		try:
+			amt = int(amt)
+			die = int(die)
+			if amt < 1 or die < 1:
+				raise
+		except Exception as e:
+			raise FeedbackError("Invalid roll!")
+
+		rolls = [random.randint(1,die) for i in range(amt)]
+		rolls = sorted(rolls, key=lambda x: 0-x)
+		total = sum(rolls)
+		rlist = ' + '.join([str(r) for r in rolls])
+
+		reply = f"{total} = {rlist}" if len(rolls) > 1 else total
+		reply = f"Rolled {amt}d{die}: {reply}"
+
+		await m.reply(reply)
 
 	async def add_char(self,m):
 		name = m.content[12:]
