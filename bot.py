@@ -367,8 +367,19 @@ class Bot():
 
 
 	async def plus_move(self,m):
-		await m.reply("rolling move and adding results to dpool...")
-		pass
+		char = self.get_player_char(m.author.id)
+		move = char.select_move(m.content[5:])
+
+		if move[3] == 1:
+			raise FeedbackError("That move has been used already!")
+
+		amt, die = self.parse_dice(move[1])
+		rolls = [str(r) for r in sorted([random.randint(1,die) for i in range(amt)], key=lambda x:0-x)]
+
+		char.dice += rolls
+		char.set_move_as_used(move)
+
+		await m.reply(f"Rolled {move[2]} ({amt}d{die}):\n`{', '.join(rolls)}`\n\n{char.sheet}", mention_author=False)
 
 
 	async def raise_dice(self,m):

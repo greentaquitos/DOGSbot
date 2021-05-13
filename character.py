@@ -197,3 +197,9 @@ class Character():
 	def print_list(self,l,title):
 		return f"```js\n{self.name}\n\n{title}:\n{l}\n```"
 
+	def set_move_as_used(self,move):
+		cursor = self.bot.db.cursor()
+		cursor.execute("UPDATE moves SET used = 1 WHERE rowid = ?",[move[4]])
+		self.bot.db.commit()
+		cursor.close()
+

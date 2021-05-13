@@ -7,31 +7,6 @@ dq rename char [indicator], New Name
 	Character Name renamed to Alice
 
 
-dq + [n]
-dq + [indicator]
-
-	-or add n to your character's dice pool
-	-or rolls the indicated move and adds it to the character’s dice pool
-
-	
-	>dq + 6
-
-	Added!
-
-	Your pool: 6, 6, 5, 2, 1
-
-	>dq + Bod
-
-	Rolled Body (6d6): 6,6,5,2,2,2
-
-	Your pool: 6, 6, 5, 5, 2, 2, 2, 2, 1
-
-	A - 2d6 - Mind
-	~~B - 6d6 - Body~~
-
-
-
-
 dq - [x,y,...]
 dq -m [indicator]
 
@@ -83,7 +58,11 @@ dq clear [dpools/pools]
 	
 	>dq clear pools
 
-	Dice pools and consequence pools cleared!
+	Dice pools and consequence pools cleared and moves reset!
+
+	>dq clear dpools
+
+	Diece pools cleared and moves reset!
 
 
 dq roll cs
