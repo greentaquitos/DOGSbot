@@ -267,14 +267,14 @@ class Bot():
 	# select active chars + print them in order of char_id
 	@property
 	def char_list(self):
-		return "\n".join([f"   {c.char_id} - {c.name}" for c in self.characters])
+		return "```js\n_\nCharacters:\n"+"\n".join([f"   {c.char_id} - {c.name}" for c in self.characters])+"\n```"
 
 	# COMMANDS
 
 	async def add_char(self,m):
 		name = m.content[12:]
 		char = Character(self, name)
-		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n```js\n_\nCharacters:\n{self.char_list}\n```", mention_author=False)
+		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n{self.char_list}", mention_author=False)
 
 
 	async def add_consequence(self,m):
@@ -330,15 +330,21 @@ class Bot():
 		char.del_move(m.content[6:])
 		await m.reply(f"Deleted move!\n{char.print_list(char.move_list,'Moves')}", mention_author=False)
 
-
+	# need vals in dpool
 	async def minus(self,m):
 		await m.reply("removing vals from dpool...")
 		pass
 
 
 	async def new_game(self,m):
-		await m.reply("starting new game with new chars...")
-		pass
+		char_names = m.content[12:].split(',')
+		
+		for c in self.characters:
+			c.archive()
+		for n in char_names:
+			c = Character(self,n.strip())
+
+		await m.reply(f"New game started with new characters!\n\n{self.char_list}", mention_author=False)
 
 
 	async def plus_dice(self,m,dice):
@@ -401,7 +407,7 @@ class Bot():
 
 
 	async def view_characters(self,m):
-		await m.reply(f"```js\n_\nCharacters:\n{self.char_list}\n```", mention_author=False)
+		await m.reply(self.char_list, mention_author=False)
 
 
 	async def view_char(self,m):
