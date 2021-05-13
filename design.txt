@@ -1,14 +1,3 @@
-dq new game Character Name, Other Name, Other Other Character Name
-	
-	-archives old characters
-	-adds new characters
-
-	New game started with:
-		1 - Character Name
-		2 - Other Char Name
-		3 - Other Other Char Name
-
-
 dq rename char [indicator], New Name
 	
 	-renames the character

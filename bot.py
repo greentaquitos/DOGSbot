@@ -347,9 +347,14 @@ class Bot():
 		await m.reply(f"New game started with new characters!\n\n{self.char_list}", mention_author=False)
 
 
-	async def plus_dice(self,m,dice):
-		await m.reply("rolling dice and adding results to dpool...")
-		pass
+	async def plus_dice(self,m,d):
+		amt, die = d
+		rolls = [str(r) for r in sorted([random.randint(1,die) for i in range(amt)], key=lambda x:0-x)]
+		
+		char = self.get_player_char(m.author.id)
+		char.dice += rolls
+
+		await m.reply(f"Rolled {amt}d{die}:\n`{', '.join(rolls)}`\n\n{char.print_list(char.dice_list,'DicePool')}", mention_author=False)
 
 
 	async def plus_int(self,m,n):

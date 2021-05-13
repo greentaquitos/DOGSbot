@@ -95,12 +95,22 @@ class Character():
 		return "\n".join([f"   {c[0]} - {c[1]} - {c[2]}" for c in self.consequences]) if len(self.consequences) else "   [empty]"
 
 	@property
-	def dice_list(self):
+	def dice(self):
 		cur = self.bot.db.execute("SELECT dice_pool FROM characters WHERE rowid = ?",[self.db_id])
 		dice = cur.fetchone()[0]
-		dice = '   ' + ", ".join(dice.split(' ')) if dice else "   [empty]"
 		cur.close()
-		return dice
+		return dice.split(' ') if dice else []
+
+	@dice.setter
+	def dice(self,v):
+		v = ' '.join(v) if v else None
+		cur = self.bot.db.execute("UPDATE characters SET dice_pool = ? WHERE rowid = ?",[v,self.db_id])
+		self.bot.db.commit()
+		cur.close()
+
+	@property
+	def dice_list(self):
+		return '   ' + ", ".join(self.dice) if len(self.dice) else "   [empty]"
 
 
 	def init_record(self):
