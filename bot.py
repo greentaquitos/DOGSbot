@@ -165,7 +165,7 @@ class Bot():
 				await self.parse_command(m)
 			elif m.content.startswith('Y') and self.confirming:
 				await self.confirm(m)
-			elif m.content.startswith('n') and self.confirming:
+			elif m.content.lower().startswith('n') and self.confirming:
 				await self.deny(m)
 
 		except FeedbackError as e:
@@ -191,12 +191,19 @@ class Bot():
 				return
 		await self.view_char(m)
 
-
+	# assuming del char only for these two
 	async def confirm(self,m):
-		pass
+		if m.author.id != self.confirming[1]:
+			return
+		self.confirming[0]()
+		self.confirming = None
+		await m.reply("Okay, done!", mention_author=False)
 
 	async def deny(self,m):
-		pass
+		if m.author.id != self.confirming[1]:
+			return
+		self.confirming = None
+		await m.reply("Okay, nevermind!", mention_author=False)
 
 	async def clear(self,m):
 		for command,method in self.clear_commands:
@@ -278,30 +285,35 @@ class Bot():
 		char.add_move(m.content[6:])
 		await m.reply(f"Added!\n\n```js\n{char.name}\n\nMoves:\n{char.move_list}\n```", mention_author=False)
 
-
+	# needs vals in dice pool
 	async def call(self,m):
 		await m.reply("calling with n...")
 		pass
 
 
 	async def clear_cpools(self,m):
-		await m.reply("clearing cpools...")
-		pass
+		for c in self.characters:
+			c.clear_consequences()
+		await m.reply("Cleared all consequence pools!", mention_author=False)
 
 
+	# needs vals in dice pool
 	async def clear_dpools(self,m):
 		await m.reply("clearing dpools...")
 		pass
 
 
+	# needs vals in dice pool
 	async def clear_pools(self,m):
 		await m.reply("clearing pools...")
 		pass
 
 
 	async def del_char(self,m):
-		await m.reply("deleting char...")
-		pass
+		char = self.get_player_char(m.author.id)
+		self.confirming = (char.archive,m.author.id)
+
+		await m.reply(f"Deleting {char.name}. Are you sure? (Y/n)", mention_author=False)
 
 
 	async def del_consequence(self,m):

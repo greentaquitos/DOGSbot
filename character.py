@@ -136,6 +136,15 @@ class Character():
 		self.bot.db.commit()
 		cursor.close()
 
+	def clear_consequences(self):
+		cursor = self.bot.db.cursor()
+		cursor.execute("DELETE FROM consequences WHERE character_id = ?",[self.db_id])
+		self.bot.db.commit()
+		cursor.close()
 
-
+	def archive(self):
+		cursor = self.bot.db.cursor()
+		cursor.execute("UPDATE characters SET active = 0 WHERE rowid = ?",[self.db_id])
+		self.bot.db.commit()
+		cursor.close()
 
