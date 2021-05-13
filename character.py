@@ -21,7 +21,6 @@ class Character():
 	def char_id(self):
 		if not self._char_id:
 			if self.db_id:
-				self.bot.log("getting char id w db id: "+str(self.db_id))
 				cur = self.bot.db.execute("SELECT char_id FROM characters WHERE rowid = ?",[self.db_id])
 				self._char_id = cur.fetchone()[0]
 				cur.close()
@@ -32,6 +31,74 @@ class Character():
 	@char_id.setter
 	def char_id(self,v):
 		self._char_id = v
+
+	@property
+	def moves(self):
+		cur = self.bot.db.execute("SELECT char_id,dice,name,used FROM moves WHERE character_id = ?",[self.db_id])
+		moves = cur.fetchall()
+		cur.close()
+		return moves
+
+	@property
+	def consequences(self):
+		cur = self.bot.db.execute("SELECT char_id,dice,name FROM consequences WHERE character_id = ?",[self.db_id])
+		cqs = cur.fetchall()
+		cur.close()
+		return cqs
+
+	@property
+	def player(self):
+		cur = self.bot.db.execute("SELECT player_id FROM characters WHERE rowid = ?",[self.db_id])
+		pid = cur.fetchone()[0]
+		cur.close()
+		return pid
+
+	@property
+	def sheet(self):
+		return '\n'.join([
+			"```js",
+			self.name,
+			'',
+			"DicePool:",
+			self.dice_list,
+			'',
+			"Moves:",
+			self.move_list,
+			'',
+			"Consequences:",
+			self.consequence_list,
+			"```"
+		])
+
+		# select active chars + print them in order of char_id
+	@property
+	def move_list(self):
+		return "\n".join(
+			[f"   {c[0]} - {c[2]}" for c in self.moves if used == 0] + 
+			[f"// {c[0]} - {c[2]}" for c in self.moves if used == 1]
+		) if len(self.moves) else "   [empty]"
+
+		# select active chars + print them in order of char_id
+	@property
+	def consequence_list(self):
+		return "\n".join([f"   {c[0]} - {c[2]}" for c in self.consequences]) if len(self.consequences) else "   [empty]"
+
+	@property
+	def dice_list(self):
+		cur = self.bot.db.execute("SELECT dice_pool FROM characters WHERE rowid = ?",[self.db_id])
+		dice = cur.fetchone()[0]
+		dice = '   ' + ", ".join(dice.split(' ')) if dice else "   [empty]"
+		cur.close()
+		return dice
+
+	@player.setter
+	def player(self,v):
+		# unset player if set
+		cur = self.bot.db.execute("UPDATE characters SET player_id = '' WHERE player_id = ?",[v])
+		cur.execute("UPDATE characters SET player_id = ? WHERE rowid = ?",[v,self.db_id])
+		self.bot.db.commit()
+		cur.close()
+
 
 	def init_record(self):
 		cursor = self.bot.db.cursor()

@@ -16,14 +16,19 @@ class Bot():
 		self.confirming = None
 
 		self.commands = [
-			("roll",self.roll),
+			("+c",self.add_consequence),
+			("+m",self.add_move),
 			("add char",self.add_char),
+			("roll",self.roll),
+			("set char",self.set_char),
 			("view",self.view)
 		]
 
 		self.view_commands = [
+			("chars",self.view_characters),
 			("characters",self.view_characters),
-			("chars",self.view_characters)
+			("cpool",self.view_cpool),
+			("moves",self.view_moves)
 		]
 		
 		if not debug:
@@ -45,8 +50,8 @@ class Bot():
 		con = self.db = sqlite3.connect("db.db")
 		schema = {
 			"characters (name text, active int, char_id text, player_id text, dice_pool text)",
-			"moves (char_id text, dice text, name text)",
-			"consequences (char_id text, dice text, name text)"
+			"moves (char_id text, character_id int, dice text, name text, used int)",
+			"consequences (char_id text, character_id int, dice text, name text)"
 		}
 
 		for t in schema:
@@ -87,6 +92,12 @@ class Bot():
 				return char
 		
 		raise FeedbackError("Too many active characters!")
+
+	def select_char(self,indicator):
+		if len(indicator) == 1:
+			return next((char for char in self.characters if char.char_id == indicator), None)
+		else:
+			return next((char for char in self.characters if char.name.lower().startswith(indicator.lower())), None)
 
 	# EVENTS
 
@@ -145,6 +156,17 @@ class Bot():
 
 	# COMMANDS
 
+	async def add_char(self,m):
+		name = m.content[12:]
+		char = Character(self, name)
+		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n{self.char_list}")
+
+	async def add_consequence(self,m):
+		pass
+
+	async def add_move(self,m):
+		pass
+
 	async def roll(self,m):
 		amt, die = m.content[8:].split('d')
 		
@@ -166,12 +188,23 @@ class Bot():
 
 		await m.reply(reply)
 
-	async def add_char(self,m):
-		name = m.content[12:]
-		char = Character(self, name)
-		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n{self.char_list}")
+	async def set_char(self,m):
+		char = self.select_char(m.content[12:])
+		if not char:
+			raise FeedbackError("Couldn't find that character")
+
+		char.player = m.author.id
+
+		reply = f"{m.author.mention}, you are now playing as {char.name}.\n\n"
+		reply += char.sheet
+
+		await m.reply(reply)
 
 	async def view_characters(self,m):
 		await m.reply(self.char_list)
 
+	async def view_cpool(self,m):
+		pass
 
+	async def view_moves(self,m):
+		pass
