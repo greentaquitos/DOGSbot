@@ -9,20 +9,6 @@ dq new game Character Name, Other Name, Other Other Character Name
 		3 - Other Other Char Name
 
 
-dq add char [name]
-
-	-adds character to the game
-
-	>dq add char Bob
-
-	Added Bob to the game!
-
-	1 - Character Name
-	2 - Other Char Name
-	3 - Other Other Char Name
-	4 - Bob
-
-
 dq del char [indicator]
 
 	-archives indicated character
@@ -41,28 +27,6 @@ dq del char [indicator]
 	3 - Other Other Char Name
 
 
-dq set char [indicator]
-
-	-indicator is the id integer as displayed above or the first n letters of the character's name
-	-sets the player who used the command as using the character indicated
-
-	>dq set char 2
-
-	@player, you are now playing as Other Char Name
-
-	Dice:
-	6, 5, 1
-
-	Consequences:
-	[empty]
-
-	Moves:
-	cool move   - 3d4
-	~~uncool move - 2d8~~
-
-
-
-
 dq rename char [indicator], New Name
 	
 	-renames the character
@@ -73,15 +37,11 @@ dq rename char [indicator], New Name
 
 
 dq + [x]d[y]
-dq +c [consequence]
 dq + [n]
-dq +m [move]
 dq + [indicator]
 
 	-rolls x y-sided dice and adds results to your character's dice pool
-	-or adds a given consequence to your character's consequence pool
 	-or add n to your character's dice pool
-	-or adds a given move to your character's sheet
 	-or rolls the indicated move and adds it to the character’s dice pool
 
 	
@@ -170,7 +130,7 @@ dq -c [indicator]
 	A - 6d6 - Body
 
 
-dq view [dpool/cpool/moves/pools/characters/indicator/dpools]
+dq view [dpool/cpool/moves/pools/indicator/dpools]
 
 	-poop out whatever list is indicated or character indicated by [indicator]
 
@@ -204,18 +164,11 @@ dq clear [dpools/cpools/pools]
 	Dice pools and consequence pools cleared!
 
 
-dq roll [x]d[y]
 dq roll cs
 dq roll [indicator]
 
-	-rolls x y-sided dice with no dice pool interaction
 	-or rolls all consequence pool dice and clears that pool
 	-or rolls indicated move's dice and marks it as used
-
-	
-	>dq roll 5d6
-
-	14 = 5 + 3 + 1 + 1 + 4
 
 	
 	>dq roll cs

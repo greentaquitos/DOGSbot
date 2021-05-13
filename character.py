@@ -1,4 +1,6 @@
 
+from exceptions import FeedbackError
+
 class Character():
 	def __init__(self,bot,name=None,db_id=None):
 		self.bot = bot
@@ -83,8 +85,8 @@ class Character():
 	@property
 	def move_list(self):
 		return "\n".join(
-			[f"   {c[0]} - {c[1]} - {c[2]}" for c in self.moves if used == 0] + 
-			[f"// {c[0]} - {c[1]} - {c[2]}" for c in self.moves if used == 1]
+			[f"   {c[0]} - {c[1]} - {c[2]}" for c in self.moves if c[3] == 0] + 
+			[f"// {c[0]} - {c[1]} - {c[2]}" for c in self.moves if c[3] == 1]
 		) if len(self.moves) else "   [empty]"
 
 		# select active chars + print them in order of char_id
@@ -117,6 +119,20 @@ class Character():
 
 		cursor = self.bot.db.cursor()
 		cursor.execute("INSERT INTO consequences(name, dice, char_id, character_id) VALUES (?,?,?,?)", [c, dice, char_id, self.db_id])
+		self.bot.db.commit()
+		cursor.close()
+
+	def add_move(self,c):
+		dice = 'd'.join(str(d) for d in self.bot.parse_dice(c.split(' ')[0]))
+		
+		if not len(c.split(' ')) > 1:
+			raise FeedbackError("You must include a label for your move! eg, `dq +m 2d6 Body`")
+		c = c[c.index(' ')+1:]
+		
+		char_id = self.bot.get_next_char_id('moves', self.db_id)
+
+		cursor = self.bot.db.cursor()
+		cursor.execute("INSERT INTO moves(name, dice, char_id, character_id, used) VALUES (?,?,?,?,0)", [c, dice, char_id, self.db_id])
 		self.bot.db.commit()
 		cursor.close()
 

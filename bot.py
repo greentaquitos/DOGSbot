@@ -18,17 +18,36 @@ class Bot():
 		self.commands = [
 			("+c",self.add_consequence),
 			("+m",self.add_move),
+			("+",self.plus),
+			("-c",self.del_consequence),
+			("-m",self.del_move),
+			("-",self.minus),
 			("add char",self.add_char),
+			("call",self.call),
+			("clear",self.clear),
+			("del char",self.del_char),
+			("new game",self.new_game),
+			("raise",self.raise_dice),
+			("rename char",self.rename_char),
 			("roll",self.roll),
 			("set char",self.set_char),
 			("view",self.view)
+		]
+
+		self.clear_commands = [
+			("cpools",self.clear_cpools),
+			("dpools",self.clear_dpools),
+			("pools",self.clear_pools)
 		]
 
 		self.view_commands = [
 			("chars",self.view_characters),
 			("characters",self.view_characters),
 			("cpool",self.view_cpool),
-			("moves",self.view_moves)
+			("dpools",self.view_dpools),
+			("dpool",self.view_dpool),
+			("moves",self.view_moves),
+			("sheet",self.view_sheet),
 		]
 		
 		if not debug:
@@ -150,11 +169,11 @@ class Bot():
 				await self.deny(m)
 
 		except FeedbackError as e:
-			await m.reply(f"Hold up: {e}")
+			await m.reply(f"Hold up: {e}", mention_author=False)
 
 		except Exception as e:
 			self.log(traceback.format_exc())
-			await m.reply(f"ERROR: {e}")
+			await m.reply(f"ERROR: {e}", mention_author=False)
 
 
 	# COMMAND PARSING
@@ -167,9 +186,11 @@ class Bot():
 
 	async def view(self,m):
 		for command,method in self.view_commands:
-			if m.content[8:].startswith(command):
+			if m.content[8:] == command:
 				await method(m)
 				return
+		await self.view_char(m)
+
 
 	async def confirm(self,m):
 		pass
@@ -177,31 +198,159 @@ class Bot():
 	async def deny(self,m):
 		pass
 
+	async def clear(self,m):
+		for command,method in self.clear_commands:
+			if m.content[9:] == command:
+				await method(m)
+				return
+		raise FeedbackError("Clear what? (dpools/cpools/pools)")
+
+	# +
+	# -rolls x y-sided dice and adds results to your character's dice pool
+	# -or add n to your character's dice pool
+	# -or rolls the indicated move and adds it to the character’s dice pool
+	async def plus(self,m):
+		d = None
+		try:
+			d = self.parse_dice(m.content[5:])
+		except FeedbackError:
+			pass
+
+		if d:
+			await self.plus_dice(m,d)
+			return
+
+		try:
+			d = int(m.content[5:])
+		except:
+			pass
+
+		if d:
+			await self.plus_int(m,d)
+			return
+
+		await self.plus_move(m)
+
+	# dice
+	# cs = all consequences
+	# indicated move
+	async def roll(self,m):
+		if m.content[8:] == 'cs':
+			await self.roll_consequences(m)
+			return
+
+		d = None
+		try:
+			d = self.parse_dice(m.content[8:])
+		except FeedbackError:
+			pass
+		
+		if d:
+			await self.roll_dice(m,d)
+			return
+
+		await self.roll_move(m)
+
 
 	# RESPONSE FORMATTING
 	
 	# select active chars + print them in order of char_id
 	@property
 	def char_list(self):
-		return "\n".join([f"{c.char_id} - {c.name}" for c in self.characters])
+		return "\n".join([f"   {c.char_id} - {c.name}" for c in self.characters])
 
 	# COMMANDS
 
 	async def add_char(self,m):
 		name = m.content[12:]
 		char = Character(self, name)
-		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n{self.char_list}")
+		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n```js\n_\nCharacters:\n{self.char_list}\n```", mention_author=False)
+
 
 	async def add_consequence(self,m):
 		char = self.get_player_char(m.author.id)
 		char.add_consequence(m.content[6:])
-		await m.reply("Added!\n\n"+char.consequence_list)
+		await m.reply(f"Added!\n\n```js\n{char.name}\n\nConsequences:\n{char.consequence_list}\n```", mention_author=False)
+
 
 	async def add_move(self,m):
+		char = self.get_player_char(m.author.id)
+		char.add_move(m.content[6:])
+		await m.reply(f"Added!\n\n```js\n{char.name}\n\nMoves:\n{char.move_list}\n```", mention_author=False)
+
+
+	async def call(self,m):
+		await m.reply("calling with n...")
 		pass
 
-	async def roll(self,m):
-		amt, die = self.parse_dice(m.content[8:])
+
+	async def clear_cpools(self,m):
+		await m.reply("clearing cpools...")
+		pass
+
+
+	async def clear_dpools(self,m):
+		await m.reply("clearing dpools...")
+		pass
+
+
+	async def clear_pools(self,m):
+		await m.reply("clearing pools...")
+		pass
+
+
+	async def del_char(self,m):
+		await m.reply("deleting char...")
+		pass
+
+
+	async def del_consequence(self,m):
+		await m.reply("deleting consequence...")
+		pass
+
+
+	async def del_move(self,m):
+		await m.reply("deleting move...")
+		pass
+
+
+	async def minus(self,m):
+		await m.reply("removing vals from dpool...")
+		pass
+
+
+	async def new_game(self,m):
+		await m.reply("starting new game with new chars...")
+		pass
+
+
+	async def plus_dice(self,m,dice):
+		await m.reply("rolling dice and adding results to dpool...")
+		pass
+
+
+	async def plus_int(self,m,n):
+		await m.reply("adding value to dpool...")
+		pass
+
+
+	async def plus_move(self,m):
+		await m.reply("rolling move and adding results to dpool...")
+		pass
+
+
+	async def raise_dice(self,m):
+		await m.reply("raising with n...")
+		pass
+
+
+	async def roll_consequences(self,m):
+		await m.reply("rolling all consequences...")
+		pass
+
+
+	async def roll_dice(self,m,d):
+		amt, die = d
 
 		rolls = [random.randint(1,die) for i in range(amt)]
 		rolls = sorted(rolls, key=lambda x: 0-x)
@@ -209,24 +358,61 @@ class Bot():
 		rlist = ' + '.join([str(r) for r in rolls])
 
 		reply = f"{total} = {rlist}" if len(rolls) > 1 else total
-		reply = f"Rolled {amt}d{die}: {reply}"
+		reply = f"Rolled {amt}d{die}:\n`{reply}`"
 
-		await m.reply(reply)
+		await m.reply(reply, mention_author=False)
+
+
+	async def roll_move(self,m):
+		await m.reply("rolling a move...")
+		pass
+
+
+	async def rename_char(self,m):
+		await m.reply("renaming a character...")
+		pass
+
 
 	async def set_char(self,m):
 		char = self.select_char(m.content[12:])
 		char.player = m.author.id
 
-		reply = f"{m.author.mention}, you are now playing as {char.name}.\n\n"
+		reply = f"You are now playing as {char.name}.\n\n"
 		reply += char.sheet
 
-		await m.reply(reply)
+		await m.reply(reply, mention_author=False)
+
 
 	async def view_characters(self,m):
-		await m.reply(self.char_list)
+		await m.reply(f"```js\n_\nCharacters:\n{self.char_list}\n```", mention_author=False)
+
+
+	async def view_char(self,m):
+		await m.reply("viewing a character...")
+		pass
+
 
 	async def view_cpool(self,m):
+		await m.reply("viewing your cpool...")
 		pass
 
-	async def view_moves(self,m):
+
+	async def view_dpool(self,m):
+		await m.reply("viewing your dpool...")
 		pass
+
+
+	async def view_dpools(self,m):
+		await m.reply("viewing all dpools...")
+		pass
+
+
+	async def view_moves(self,m):
+		await m.reply("viewing your moves...")
+		pass
+
+
+	async def view_sheet(self,m):
+		await m.reply("viewing your sheet...")
+		pass
+
