@@ -99,7 +99,7 @@ class Character():
 		cur = self.bot.db.execute("SELECT dice_pool FROM characters WHERE rowid = ?",[self.db_id])
 		dice = cur.fetchone()[0]
 		cur.close()
-		return dice.split(' ') if dice else []
+		return sorted(dice.split(' '),key=lambda x:0-int(x)) if dice else []
 
 	@dice.setter
 	def dice(self,v):

@@ -7,35 +7,11 @@ dq rename char [indicator], New Name
 	Character Name renamed to Alice
 
 
-dq + [x]d[y]
 dq + [n]
 dq + [indicator]
 
-	-rolls x y-sided dice and adds results to your character's dice pool
 	-or add n to your character's dice pool
 	-or rolls the indicated move and adds it to the character’s dice pool
-
-	
-	>dq + 2d8
-
-	Rolled: 1, 6
-
-	Your pool: 6, 5, 2, 1
-
-	
-	>dq +c 3d6 a big yike
-
-	Added!
-
-	A - 3d6 - a big yike
-
-	
-	>dq +c 2d4 a small yike
-
-	Added!
-
-	A - 3d6 - a big yike
-	B - 2d4 - a small yike
 
 	
 	>dq + 6
@@ -43,15 +19,6 @@ dq + [indicator]
 	Added!
 
 	Your pool: 6, 6, 5, 2, 1
-
-	
-	>dq +m 6d6 Body
-
-	Added!
-
-	A - 2d6 - Mind
-	B - 6d6 - Body
-
 
 	>dq + Bod
 

@@ -358,8 +358,12 @@ class Bot():
 
 
 	async def plus_int(self,m,n):
-		await m.reply("adding value to dpool...")
-		pass
+		n = str(n)
+
+		char = self.get_player_char(m.author.id)
+		char.dice += [n]
+		
+		await m.reply(f"Added {n} to your dice pool!\n\n{char.print_list(char.dice_list,'DicePool')}", mention_author=False)
 
 
 	async def plus_move(self,m):
