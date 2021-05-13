@@ -36,14 +36,14 @@ class Character():
 
 	@property
 	def moves(self):
-		cur = self.bot.db.execute("SELECT char_id,dice,name,used FROM moves WHERE character_id = ?",[self.db_id])
+		cur = self.bot.db.execute("SELECT char_id,dice,name,used,rowid FROM moves WHERE character_id = ? ORDER BY char_id",[self.db_id])
 		moves = cur.fetchall()
 		cur.close()
 		return moves
 
 	@property
 	def consequences(self):
-		cur = self.bot.db.execute("SELECT char_id,dice,name FROM consequences WHERE character_id = ?",[self.db_id])
+		cur = self.bot.db.execute("SELECT char_id,dice,name,rowid FROM consequences WHERE character_id = ? ORDER BY char_id",[self.db_id])
 		cqs = cur.fetchall()
 		cur.close()
 		return cqs
@@ -147,4 +147,22 @@ class Character():
 		cursor.execute("UPDATE characters SET active = 0 WHERE rowid = ?",[self.db_id])
 		self.bot.db.commit()
 		cursor.close()
+
+	def del_consequence(self,c):
+		consequence = self.select_consequence(c)
+		cursor = self.bot.db.cursor()
+		cursor.execute("DELETE FROM consequences WHERE rowid = ?",[consequence[3]])
+		self.bot.db.commit()
+		cursor.close()
+
+	def select_consequence(self,c):
+		if len(c) == 1:
+			return next((con for con in self.consequences if con[0] == c), None)
+		else:
+			return next((con for con in self.consequences if con[2].lower().startswith(c.lower())), None)
+
+		raise FeedbackError("Couldn't find that consequence")
+
+	def print_list(self,l,title):
+		return f"```js\n{self.name}\n\n{title}:\n{l}\n```"
 

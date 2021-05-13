@@ -9,24 +9,6 @@ dq new game Character Name, Other Name, Other Other Character Name
 		3 - Other Other Char Name
 
 
-dq del char [indicator]
-
-	-archives indicated character
-	-probably a confirm prompt for this?
-
-	>dq del char 4
-
-	Deleting Bob, are you sure? (Y/n)
-
-	>Y
-
-	Deleted Bob!
-
-	1 - Character Name
-	2 - Other Char Name
-	3 - Other Other Char Name
-
-
 dq rename char [indicator], New Name
 	
 	-renames the character
@@ -154,7 +136,7 @@ dq view [dpool/cpool/moves/pools/indicator/dpools]
 	~~uncool move - 2d8~~
 
 
-dq clear [dpools/cpools/pools]
+dq clear [dpools/pools]
 
 	-resets all of the given type of pool for all characters
 

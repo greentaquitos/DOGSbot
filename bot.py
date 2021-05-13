@@ -277,13 +277,13 @@ class Bot():
 	async def add_consequence(self,m):
 		char = self.get_player_char(m.author.id)
 		char.add_consequence(m.content[6:])
-		await m.reply(f"Added!\n\n```js\n{char.name}\n\nConsequences:\n{char.consequence_list}\n```", mention_author=False)
+		await m.reply(f"Added!\n\n{char.print_list(char.consequence_list,'Consequences')}", mention_author=False)
 
 
 	async def add_move(self,m):
 		char = self.get_player_char(m.author.id)
 		char.add_move(m.content[6:])
-		await m.reply(f"Added!\n\n```js\n{char.name}\n\nMoves:\n{char.move_list}\n```", mention_author=False)
+		await m.reply(f"Added!\n\n{char.print_list(char.move_list,'Moves')}", mention_author=False)
 
 	# needs vals in dice pool
 	async def call(self,m):
@@ -317,8 +317,9 @@ class Bot():
 
 
 	async def del_consequence(self,m):
-		await m.reply("deleting consequence...")
-		pass
+		char = self.get_player_char(m.author.id)
+		char.del_consequence(m.content[6:])
+		await m.reply(f"Deleted consequence!\n{char.print_list(char.consequence_list,'Consequences')}", mention_author=False)
 
 
 	async def del_move(self,m):
