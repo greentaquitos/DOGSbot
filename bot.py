@@ -143,10 +143,13 @@ class Bot():
 
 	def select_char(self,indicator):
 		if len(indicator) == 1:
-			return next((char for char in self.characters if char.char_id == indicator), None)
+			c = next((char for char in self.characters if char.char_id == indicator), None)
 		else:
-			return next((char for char in self.characters if char.name.lower().startswith(indicator.lower())), None)
+			c = next((char for char in self.characters if char.name.lower().startswith(indicator.lower())), None)
 
+		if c:
+			return c
+		
 		raise FeedbackError("Couldn't find that character")
 
 	# EVENTS
@@ -323,8 +326,9 @@ class Bot():
 
 
 	async def del_move(self,m):
-		await m.reply("deleting move...")
-		pass
+		char = self.get_player_char(m.author.id)
+		char.del_move(m.content[6:])
+		await m.reply(f"Deleted move!\n{char.print_list(char.move_list,'Moves')}", mention_author=False)
 
 
 	async def minus(self,m):

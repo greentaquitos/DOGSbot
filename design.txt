@@ -78,31 +78,15 @@ dq + [indicator]
 
 dq - [x,y,...]
 dq -m [indicator]
-dq -c [indicator]
 
 	-removes values from dice pool
 	-or removes indicated move from character sheet
-	-or removes indicated consequence from consequence pool
 
 	>dq - 6 2
 
 	Removed 6 and 2!
 
 	Your pool: 6, 5, 1
-
-	
-	>dq -c A
-
-	Removed `a big yike`!
-
-	A - a small yike
-
-	
-	>dq -c a small
-
-	Removed `a small yike`!
-
-	[empty]
 
 	
 	>dq -m mind

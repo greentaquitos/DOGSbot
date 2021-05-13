@@ -155,11 +155,32 @@ class Character():
 		self.bot.db.commit()
 		cursor.close()
 
+	def del_move(self,m):
+		move = self.select_move(m)
+		cursor = self.bot.db.cursor()
+		cursor.execute("DELETE FROM moves WHERE rowid = ?",[move[4]])
+		self.bot.db.commit()
+		cursor.close()
+
+	def select_move(self,c):
+		if len(c) == 1:
+			m = next((con for con in self.moves if con[0] == c), None)
+		else:
+			m = next((con for con in self.moves if con[2].lower().startswith(c.lower())), None)
+
+		if m:
+			return m
+
+		raise FeedbackError("Couldn't find that move")
+
 	def select_consequence(self,c):
 		if len(c) == 1:
-			return next((con for con in self.consequences if con[0] == c), None)
+			c = next((con for con in self.consequences if con[0] == c), None)
 		else:
-			return next((con for con in self.consequences if con[2].lower().startswith(c.lower())), None)
+			c = next((con for con in self.consequences if con[2].lower().startswith(c.lower())), None)
+		
+		if c:
+			return c
 
 		raise FeedbackError("Couldn't find that consequence")
 
