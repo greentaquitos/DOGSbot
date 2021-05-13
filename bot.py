@@ -80,10 +80,16 @@ class Bot():
 		if self.debug:
 			self.log(m)
 
-	def get_next_char_id(self):
+	def get_next_char_id(self, table="characters", character_id=None):
 		chars = string.ascii_uppercase+string.ascii_lowercase
+
+		if table == "characters":
+			cur = self.db.execute("SELECT char_id FROM characters WHERE active = 1 ORDER BY char_id")
+		if table == "consequences":
+			cur = self.db.execute("SELECT char_id FROM consequences WHERE character_id = ? ORDER BY char_id", [character_id])
+		if table == "moves":
+			cur = self.db.execute("SELECT char_id FROM moves WHERE character_id = ? ORDER BY char_id", [character_id])
 		
-		cur = self.db.execute("SELECT char_id FROM characters WHERE active = 1 ORDER BY char_id")
 		char_ids = [c[0] for c in cur.fetchall()]
 		cur.close()
 		
@@ -93,11 +99,36 @@ class Bot():
 		
 		raise FeedbackError("Too many active characters!")
 
+
+	def get_player_char(self,pid):
+		c = next((char for char in self.characters if char.player and int(char.player) == int(pid)),None)
+
+		if c:
+			return c
+
+		raise FeedbackError("Set your character first! (`dq set char [their name]`)")
+
+
+	def parse_dice(self, dice):
+		try:
+			amt, die = dice.split('d')
+			amt = int(amt)
+			die = int(die)
+			if amt < 1 or die < 1:
+				raise
+		except Exception as e:
+			raise FeedbackError("Invalid roll!")
+
+		return amt, die
+
+
 	def select_char(self,indicator):
 		if len(indicator) == 1:
 			return next((char for char in self.characters if char.char_id == indicator), None)
 		else:
 			return next((char for char in self.characters if char.name.lower().startswith(indicator.lower())), None)
+
+		raise FeedbackError("Couldn't find that character")
 
 	# EVENTS
 
@@ -119,11 +150,11 @@ class Bot():
 				await self.deny(m)
 
 		except FeedbackError as e:
-			await m.reply(f"ERROR: {e}")
+			await m.reply(f"Hold up: {e}")
 
 		except Exception as e:
 			self.log(traceback.format_exc())
-			await m.reply(f"UNCAUGHT ERROR: {e}")
+			await m.reply(f"ERROR: {e}")
 
 
 	# COMMAND PARSING
@@ -162,21 +193,15 @@ class Bot():
 		await m.reply(f"Added {name} ({char.char_id}) to the game!\n\n{self.char_list}")
 
 	async def add_consequence(self,m):
-		pass
+		char = self.get_player_char(m.author.id)
+		char.add_consequence(m.content[6:])
+		await m.reply("Added!\n\n"+char.consequence_list)
 
 	async def add_move(self,m):
 		pass
 
 	async def roll(self,m):
-		amt, die = m.content[8:].split('d')
-		
-		try:
-			amt = int(amt)
-			die = int(die)
-			if amt < 1 or die < 1:
-				raise
-		except Exception as e:
-			raise FeedbackError("Invalid roll!")
+		amt, die = self.parse_dice(m.content[8:])
 
 		rolls = [random.randint(1,die) for i in range(amt)]
 		rolls = sorted(rolls, key=lambda x: 0-x)
@@ -190,9 +215,6 @@ class Bot():
 
 	async def set_char(self,m):
 		char = self.select_char(m.content[12:])
-		if not char:
-			raise FeedbackError("Couldn't find that character")
-
 		char.player = m.author.id
 
 		reply = f"{m.author.mention}, you are now playing as {char.name}.\n\n"

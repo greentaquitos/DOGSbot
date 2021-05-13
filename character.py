@@ -53,6 +53,15 @@ class Character():
 		cur.close()
 		return pid
 
+
+	@player.setter
+	def player(self,v):
+		# unset player if set
+		cur = self.bot.db.execute("UPDATE characters SET player_id = '' WHERE player_id = ?",[v])
+		cur.execute("UPDATE characters SET player_id = ? WHERE rowid = ?",[v,self.db_id])
+		self.bot.db.commit()
+		cur.close()
+
 	@property
 	def sheet(self):
 		return '\n'.join([
@@ -74,14 +83,14 @@ class Character():
 	@property
 	def move_list(self):
 		return "\n".join(
-			[f"   {c[0]} - {c[2]}" for c in self.moves if used == 0] + 
-			[f"// {c[0]} - {c[2]}" for c in self.moves if used == 1]
+			[f"   {c[0]} - {c[1]} - {c[2]}" for c in self.moves if used == 0] + 
+			[f"// {c[0]} - {c[1]} - {c[2]}" for c in self.moves if used == 1]
 		) if len(self.moves) else "   [empty]"
 
 		# select active chars + print them in order of char_id
 	@property
 	def consequence_list(self):
-		return "\n".join([f"   {c[0]} - {c[2]}" for c in self.consequences]) if len(self.consequences) else "   [empty]"
+		return "\n".join([f"   {c[0]} - {c[1]} - {c[2]}" for c in self.consequences]) if len(self.consequences) else "   [empty]"
 
 	@property
 	def dice_list(self):
@@ -91,14 +100,6 @@ class Character():
 		cur.close()
 		return dice
 
-	@player.setter
-	def player(self,v):
-		# unset player if set
-		cur = self.bot.db.execute("UPDATE characters SET player_id = '' WHERE player_id = ?",[v])
-		cur.execute("UPDATE characters SET player_id = ? WHERE rowid = ?",[v,self.db_id])
-		self.bot.db.commit()
-		cur.close()
-
 
 	def init_record(self):
 		cursor = self.bot.db.cursor()
@@ -107,3 +108,18 @@ class Character():
 		i = cursor.lastrowid
 		cursor.close()
 		self.db_id = i
+
+
+	def add_consequence(self,c):
+		dice = 'd'.join(str(d) for d in self.bot.parse_dice(c.split(' ')[0]))
+		c = c[c.index(' ')+1:] if len(c.split(' ')) > 1 else ''
+		char_id = self.bot.get_next_char_id('consequences', self.db_id)
+
+		cursor = self.bot.db.cursor()
+		cursor.execute("INSERT INTO consequences(name, dice, char_id, character_id) VALUES (?,?,?,?)", [c, dice, char_id, self.db_id])
+		self.bot.db.commit()
+		cursor.close()
+
+
+
+
