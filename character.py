@@ -203,3 +203,20 @@ class Character():
 		self.bot.db.commit()
 		cursor.close()
 
+	def rename(self,name):
+		cursor = self.bot.db.cursor()
+		cursor.execute("UPDATE characters SET name = ? WHERE rowid = ?",[name,self.db_id])
+		self.bot.db.commit()
+		cursor.close()
+
+
+
+
+
+
+
+
+
+
+
+

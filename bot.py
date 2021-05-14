@@ -469,8 +469,12 @@ class Bot():
 
 
 	async def rename_char(self,m):
-		await m.reply("renaming a character...")
-		pass
+		char = self.get_player_char(m.author.id)
+		name = m.content[15:]
+		old_name = char.name
+
+		char.rename(name)
+		await m.reply(f"Renamed {old_name} to {name}!",mention_author=False)
 
 
 	async def set_char(self,m):

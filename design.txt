@@ -1,12 +1,3 @@
-dq rename char [indicator], New Name
-	
-	-renames the character
-
-	>dq rename Character Name, Alice
-	
-	Character Name renamed to Alice
-
-
 dq - [x,y,...]
 dq -m [indicator]
 
