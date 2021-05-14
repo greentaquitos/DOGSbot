@@ -383,8 +383,28 @@ class Bot():
 
 
 	async def raise_dice(self,m):
-		await m.reply("raising with n...")
-		pass
+		char = self.get_player_char(m.author.id)
+		dice = m.content[9:].split(' ')
+		
+		try:
+			test = [int(d) for d in dice]
+		except:
+			raise FeedbackError("Invalid values. Syntax is, for example, `dq raise 4 5`.")
+
+		if len(dice) > 2:
+			raise FeedbackError("You must raise with one or two values.")
+
+		cdice = char.dice
+		try:
+			for d in dice:
+				cdice.remove(d)
+		except:
+			raise FeedbackError("You don't have those values in your dice pool!")
+
+		char.dice = cdice
+		vstring = ' and '.join(dice)
+
+		await m.reply(f"Raised with {vstring}!\n\n{char.print_list(char.dice_list,'DicePool')}", mention_author=False)
 
 
 	async def roll_consequences(self,m):
