@@ -8,6 +8,7 @@ import traceback
 
 from character import Character
 from exceptions import FeedbackError
+import bothelp
 
 
 class Bot():
@@ -26,6 +27,7 @@ class Bot():
 			("call",self.call),
 			("clear",self.clear),
 			("del char",self.del_char),
+			("help",self.help),
 			("new game",self.new_game),
 			("raise",self.raise_dice),
 			("rename char",self.rename_char),
@@ -43,11 +45,12 @@ class Bot():
 		self.view_commands = [
 			("chars",self.view_characters),
 			("characters",self.view_characters),
+			("char",self.view_char),
 			("cpool",self.view_cpool),
 			("dpools",self.view_dpools),
 			("dpool",self.view_dpool),
 			("moves",self.view_moves),
-			("sheet",self.view_sheet),
+			("sheet",self.view_char),
 		]
 		
 		if not debug:
@@ -195,7 +198,7 @@ class Bot():
 			if m.content[8:] == command:
 				await method(m)
 				return
-		await self.view_char(m)
+		await self.view_char(m,select=True)
 
 	# assuming del char only for these two
 	async def confirm(self,m):
@@ -218,10 +221,7 @@ class Bot():
 				return
 		raise FeedbackError("Clear what? (dpools/cpools/pools)")
 
-	# +
-	# -rolls x y-sided dice and adds results to your character's dice pool
-	# -or add n to your character's dice pool
-	# -or rolls the indicated move and adds it to the character’s dice pool
+
 	async def plus(self,m):
 		d = None
 		try:
@@ -244,9 +244,7 @@ class Bot():
 
 		await self.plus_move(m)
 
-	# dice
-	# cs = all consequences
-	# indicated move
+
 	async def roll(self,m):
 		if m.content[8:] == 'cs':
 			await self.roll_consequences(m)
@@ -291,10 +289,36 @@ class Bot():
 		char.add_move(m.content[6:])
 		await m.reply(f"Added!\n\n{char.print_list(char.move_list,'Moves')}", mention_author=False)
 
-	# needs vals in dice pool
+
 	async def call(self,m):
-		await m.reply("calling with n...")
-		pass
+		char = self.get_player_char(m.author.id)
+		dice = m.content[8:].split(' ')
+		
+		try:
+			test = [int(d) for d in dice]
+		except:
+			raise FeedbackError("Invalid values. Syntax is, for example, `dq call 4 5`.")
+
+		cdice = char.dice
+		try:
+			for d in dice:
+				cdice.remove(d)
+		except:
+			raise FeedbackError("You don't have those values in your dice pool!")
+
+		char.dice = cdice
+		vstring = str(sum(test))
+
+		if len(dice) < 2:
+			reply = f"Counter! Use {vstring} as one of your dice on your next raise."
+		elif len(dice) < 3:
+			reply = f"Called with {vstring}!\nBlock or Dodge!"
+		else:
+			reply = f"Called with {vstring}!\nHit! Take {len(dice)} consequence dice!"
+
+		reply = f"```js\n{reply}\n\nDicePool:\n{char.dice_list}```"
+
+		await m.reply(reply, mention_author=False)
 
 
 	async def clear_cpools(self,m):
@@ -303,16 +327,21 @@ class Bot():
 		await m.reply("Cleared all consequence pools!", mention_author=False)
 
 
-	# needs vals in dice pool
 	async def clear_dpools(self,m):
-		await m.reply("clearing dpools...")
-		pass
+		for c in self.characters:
+			c.dice = []
+			c.reset_moves()
+
+		await m.reply("Cleared all dice pools and reset moves!", mention_author=False)
 
 
-	# needs vals in dice pool
 	async def clear_pools(self,m):
-		await m.reply("clearing pools...")
-		pass
+		for c in self.characters:
+			c.clear_consequences()
+			c.dice = []
+			c.reset_moves()
+
+		await m.reply("Cleared all dice and consequence pools and reset moves!", mention_author=False)
 
 
 	async def del_char(self,m):
@@ -333,10 +362,26 @@ class Bot():
 		char.del_move(m.content[6:])
 		await m.reply(f"Deleted move!\n{char.print_list(char.move_list,'Moves')}", mention_author=False)
 
-	# need vals in dpool
+
 	async def minus(self,m):
-		await m.reply("removing vals from dpool...")
-		pass
+		char = self.get_player_char(m.author.id)
+		dice = m.content[5:].split(' ')
+		
+		try:
+			test = [int(d) for d in dice]
+		except:
+			raise FeedbackError("Invalid values. Syntax is, for example, `dq - 4 5`.")
+
+		cdice = char.dice
+		try:
+			for d in dice:
+				cdice.remove(d)
+		except:
+			raise FeedbackError("You don't have those values in your dice pool!")
+
+		char.dice = cdice
+
+		await m.reply(f"Removed!\n\n{char.print_list(char.dice_list,'DicePool')}", mention_author=False)
 
 
 	async def new_game(self,m):
@@ -491,32 +536,57 @@ class Bot():
 		await m.reply(self.char_list, mention_author=False)
 
 
-	async def view_char(self,m):
-		await m.reply("viewing a character...")
-		pass
+	async def view_char(self,m,select=False):
+		if select:
+			char = self.select_char(m.content[8:])
+		else:
+			char = self.get_player_char(m.author.id)
+		await m.reply(char.sheet, mention_author=False)
 
 
 	async def view_cpool(self,m):
-		await m.reply("viewing your cpool...")
-		pass
+		char = self.get_player_char(m.author.id)
+		await m.reply(char.print_list(char.consequence_list,'Consequences'), mention_author=False)
 
 
 	async def view_dpool(self,m):
-		await m.reply("viewing your dpool...")
-		pass
+		char = self.get_player_char(m.author.id)
+		await m.reply(char.print_list(char.dice_list,'DicePool'), mention_author=False)
 
 
 	async def view_dpools(self,m):
-		await m.reply("viewing all dpools...")
-		pass
+		chars = [c for c in self.characters if len(c.dice)]
+
+		if not len(chars):
+			raise FeedbackError("No dice pools are active.")
+
+		reply = ["```js",'_']
+		for c in chars:
+			reply += [c.name+':', c.dice_list]
+		reply += ["```"]
+
+		await m.reply("\n".join(reply),mention_author=False)
 
 
 	async def view_moves(self,m):
-		await m.reply("viewing your moves...")
-		pass
+		char = self.get_player_char(m.author.id)
+		await m.reply(char.print_list(char.move_list,'Moves'), mention_author=False)
 
 
-	async def view_sheet(self,m):
-		await m.reply("viewing your sheet...")
-		pass
+	async def help(self,m):
+		h_content = m.content[8:]
+		
+		if h_content == "character":
+			reply = bothelp.character
+		elif h_content == "rolling":
+			reply = bothelp.rolling
+		elif h_content == "gm":
+			reply = bothelp.gm
+		elif h_content == "dpool":
+			reply = bothelp.dpool
+		elif h_content == "glossary":
+			reply = bothelp.glossary
+		else:
+			reply = bothelp.default
 
+		await m.reply(reply, mention_author=False)

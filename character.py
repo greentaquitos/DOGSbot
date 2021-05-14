@@ -113,9 +113,12 @@ class Character():
 		return '   ' + ", ".join(self.dice) if len(self.dice) else "   [empty]"
 
 
+	def clean_string(self,s):
+		return s.replace('"','').replace("'",'').replace('`','').replace('//','').replace('#','').replace('(','').replace('[','').replace('{','').replace(':','').replace('\\','').replace(';','')
+
 	def init_record(self):
 		cursor = self.bot.db.cursor()
-		cursor.execute("INSERT INTO characters (name,active,char_id) VALUES (?,?,?)", [self.name, 1, self.char_id])
+		cursor.execute("INSERT INTO characters (name,active,char_id) VALUES (?,?,?)", [self.clean_string(self.name), 1, self.char_id])
 		self.bot.db.commit()
 		i = cursor.lastrowid
 		cursor.close()
@@ -128,7 +131,7 @@ class Character():
 		char_id = self.bot.get_next_char_id('consequences', self.db_id)
 
 		cursor = self.bot.db.cursor()
-		cursor.execute("INSERT INTO consequences(name, dice, char_id, character_id) VALUES (?,?,?,?)", [c, dice, char_id, self.db_id])
+		cursor.execute("INSERT INTO consequences(name, dice, char_id, character_id) VALUES (?,?,?,?)", [self.clean_string(c), dice, char_id, self.db_id])
 		self.bot.db.commit()
 		cursor.close()
 
@@ -142,7 +145,7 @@ class Character():
 		char_id = self.bot.get_next_char_id('moves', self.db_id)
 
 		cursor = self.bot.db.cursor()
-		cursor.execute("INSERT INTO moves(name, dice, char_id, character_id, used) VALUES (?,?,?,?,0)", [c, dice, char_id, self.db_id])
+		cursor.execute("INSERT INTO moves(name, dice, char_id, character_id, used) VALUES (?,?,?,?,0)", [self.clean_string(c), dice, char_id, self.db_id])
 		self.bot.db.commit()
 		cursor.close()
 
@@ -200,6 +203,12 @@ class Character():
 	def set_move_as_used(self,move):
 		cursor = self.bot.db.cursor()
 		cursor.execute("UPDATE moves SET used = 1 WHERE rowid = ?",[move[4]])
+		self.bot.db.commit()
+		cursor.close()
+
+	def reset_moves(self):
+		cursor = self.bot.db.cursor()
+		cursor.execute("UPDATE moves SET used = 0 WHERE character_id = ?",[self.db_id])
 		self.bot.db.commit()
 		cursor.close()
 
