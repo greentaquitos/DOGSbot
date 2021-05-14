@@ -65,39 +65,9 @@ dq clear [dpools/pools]
 	Diece pools cleared and moves reset!
 
 
-dq roll cs
 dq roll [indicator]
 
-	-or rolls all consequence pool dice and clears that pool
 	-or rolls indicated move's dice and marks it as used
-
-	
-	>dq roll cs
-	
-	Rolling consequence pool!
-
-	a big yike (3d6): 4,3,1
-	a small yike (2d4): 2,2
-	
-	4+3 = 7
-	One 1 was rolled!
-
-
-dq raise [x] [y]
-
-	-removes 1 or 2 values from dice pool
-
-	
-	>dq raise 1 2
-
-	Raised with 3!
-
-	Your pool: 6, 6, 5
-
-	
-	>dq raise 1 4 4
-
-	You must raise with one or two dice!
 
 
 dq call [x, y, ...]

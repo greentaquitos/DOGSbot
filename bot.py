@@ -140,6 +140,9 @@ class Bot():
 
 		return amt, die
 
+	def r(self,amt,die):
+		return sorted([random.randint(1,die) for i in range(amt)], key=lambda x:0-x)
+
 
 	def select_char(self,indicator):
 		if len(indicator) == 1:
@@ -349,7 +352,7 @@ class Bot():
 
 	async def plus_dice(self,m,d):
 		amt, die = d
-		rolls = [str(r) for r in sorted([random.randint(1,die) for i in range(amt)], key=lambda x:0-x)]
+		rolls = [str(r) for r in self.r(amt,die)]
 		
 		char = self.get_player_char(m.author.id)
 		char.dice += rolls
@@ -374,7 +377,7 @@ class Bot():
 			raise FeedbackError("That move has been used already!")
 
 		amt, die = self.parse_dice(move[1])
-		rolls = [str(r) for r in sorted([random.randint(1,die) for i in range(amt)], key=lambda x:0-x)]
+		rolls = [str(r) for r in self.r(amt,die)]
 
 		char.dice += rolls
 		char.set_move_as_used(move)
@@ -408,15 +411,39 @@ class Bot():
 
 
 	async def roll_consequences(self,m):
-		await m.reply("rolling all consequences...")
-		pass
+		char = self.get_player_char(m.author.id)
+		cqs = char.consequences
+
+		if len(cqs) < 1:
+			raise FeedbackError("There are consequences in your pool!")
+
+		reply = ["Rolled your consequence pool!",'',"```js"]
+		ones = 0
+		two = [0,0]
+
+		for c in cqs:
+			amt, die = self.parse_dice(c[1])
+			rolls = self.r(amt,die)
+			two = sorted(rolls + two, key=lambda x:0-x)[:2]
+			ones += rolls.count(1)
+			reply += [f"{c[2]} ({amt}d{die}): {','.join([str(r) for r in rolls])}"]
+
+		reply += ['',f"{str(two[0]+two[1])} = {two[0]} + {two[1]}"]
+
+		if ones:
+			reply += [f"Rolled {str(ones)} one[s]!"]
+
+		reply += ["```"]
+
+		char.clear_consequences()
+
+		await m.reply("\n".join(reply), mention_author = False)
 
 
 	async def roll_dice(self,m,d):
 		amt, die = d
 
-		rolls = [random.randint(1,die) for i in range(amt)]
-		rolls = sorted(rolls, key=lambda x: 0-x)
+		rolls = self.r(amt,die)
 		total = sum(rolls)
 		rlist = ' + '.join([str(r) for r in rolls])
 
