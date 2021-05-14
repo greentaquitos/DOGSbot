@@ -454,8 +454,18 @@ class Bot():
 
 
 	async def roll_move(self,m):
-		await m.reply("rolling a move...")
-		pass
+		char = self.get_player_char(m.author.id)
+		move = char.select_move(m.content[8:])
+
+		if move[3] == 1:
+			raise FeedbackError("That move has been used already!")
+
+		amt, die = self.parse_dice(move[1])
+		rolls = [str(r) for r in self.r(amt,die)]
+
+		char.set_move_as_used(move)
+
+		await m.reply(f"Rolled {move[2]} ({amt}d{die}):\n`{', '.join(rolls)}`\n\n{char.print_list(char.move_list,'Moves')}", mention_author=False)
 
 
 	async def rename_char(self,m):
