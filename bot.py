@@ -119,7 +119,7 @@ class Bot():
 			if char not in char_ids:
 				return char
 		
-		raise FeedbackError("Too many active characters!")
+		raise FeedbackError("Too many active "+table+"!")
 
 
 	def get_player_char(self,pid):

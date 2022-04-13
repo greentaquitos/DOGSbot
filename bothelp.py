@@ -34,6 +34,8 @@ character = """`dq add char [name]`
 
 `dq view char/sheet`
 	View the character sheet of your set character.
+`dq view chars`
+	View a list of all characters
 `dq view dpool/cpool/moves`
 	View your dice pool, your consequence pool, or your move list."""
 
